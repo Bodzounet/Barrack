@@ -2,7 +2,18 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public abstract class Ball : MonoBehaviour
+namespace GameEngine
 {
-    
+    public abstract class Ball : MonoBehaviour
+    {
+        private Cell _parentCell;
+        public virtual Cell ParentCell
+        {
+            get { return _parentCell; }
+            set
+            {
+                _parentCell = value;
+            }
+        }
+    }
 }

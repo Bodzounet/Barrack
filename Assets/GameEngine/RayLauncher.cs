@@ -27,7 +27,7 @@ namespace GameEngine
             private set;
         }
 
-        public GameManager gameManager;
+        private GameManager _gameManager;
 
         public GameObject P_Ray;
 
@@ -35,6 +35,7 @@ namespace GameEngine
 
         private void Start()
         {
+            _gameManager = GameManager.Instance;
             _previousMousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             Cursor.visible = false;
         }
@@ -51,8 +52,9 @@ namespace GameEngine
             Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             Vector3 delta = Camera.main.ScreenToWorldPoint(Input.mousePosition) - _previousMousePos;
             Vector3 newPos = transform.position + delta;
-            newPos = new Vector3(Mathf.Clamp(newPos.x, gameManager.RootCell.bottomLeft.x, gameManager.RootCell.topRight.x),
-                Mathf.Clamp(newPos.y, gameManager.RootCell.bottomLeft.y, gameManager.RootCell.topRight.y));
+            newPos = new Vector3(Mathf.Clamp(newPos.x, _gameManager.RootCell.bottomLeft.x, _gameManager.RootCell.topRight.x),
+                Mathf.Clamp(newPos.y, _gameManager.RootCell.bottomLeft.y, _gameManager.RootCell.topRight.y),
+                -2);
 
             _previousMousePos = mousePos;
             transform.position = newPos;
@@ -71,21 +73,23 @@ namespace GameEngine
             if (!IsShooting && Input.GetMouseButtonDown(0))
             {
                 Cell emptyCell = null;
-                if (_IsInAnEmptyCell(gameManager.RootCell, transform.position, out emptyCell))
+                if (_IsInAnEmptyCell(_gameManager.RootCell, transform.position, out emptyCell))
                 {
                     IsShooting = true;
-                    GameObject go = GameObject.Instantiate(P_Ray, transform.position, Quaternion.identity);
-                    Ray ray = go.GetComponent<Ray>();
-                    ray.DrawRay(transform.position, Direction,
+                    Vector2 shootingPos = transform.position;
+
+                    GameObject go = GameObject.Instantiate(P_Ray, shootingPos, Quaternion.identity);
+                    WallBuilder ray = go.GetComponent<WallBuilder>();
+                    ray.DrawRay(new Vector3(transform.position.x, transform.position.y, 0), Direction,
                     () =>
                     {
-                        emptyCell.DivideCell(transform.position, Direction);
+                        emptyCell.DivideCell(shootingPos, Direction);
                         IsShooting = false;
                     },
                     () =>
                     {
-                    // gameManager.Life--;
-                    IsShooting = false;
+                        // gameManager.Life--;
+                        IsShooting = false;
                     });
                 }
             }
@@ -93,8 +97,8 @@ namespace GameEngine
 
         private bool _IsInAnEmptyCell(Cell cell, Vector2 position, out Cell emptyCell)
         {
-            if (cell.childrens != null)
-                return _IsInAnEmptyCell(cell.childrens.item1, position, out emptyCell) || _IsInAnEmptyCell(cell.childrens.item2, position, out emptyCell);
+            if (cell.Childrens != null)
+                return _IsInAnEmptyCell(cell.Childrens.item1, position, out emptyCell) || _IsInAnEmptyCell(cell.Childrens.item2, position, out emptyCell);
 
             if (!cell.Filled && cell.Contains(position))
             {

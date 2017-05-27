@@ -1,59 +1,104 @@
 ﻿using System;
+using System.Collections;
 using UnityEngine;
 
 namespace GameEngine
 {
     public class Ray : MonoBehaviour
     {
-        [SerializeField]
-        private HalfRay[] halfrays;
+        public enum RayDirection
+        {
+            Up = 0,
+            Down = 2,
+            Left = 1,
+            Right = 3
+        }
 
-        private Action _onComplete;
-        private Action _onFail;
+        public event Action OnReachAWall;
+        public event Action OnHit;
+
+        private LineRenderer _ray;
+        private BoxCollider2D _collider;
+
+        public float speed = 1f;
+
+        public bool isOver { get; private set; }
 
         private void Awake()
         {
-            halfrays[0].OnHit += _CB_OnHalfRayIsHit;
-            halfrays[1].OnHit += _CB_OnHalfRayIsHit;
-
-            halfrays[0].OnReachAWall += _CB_OnHalfRayIsOver;
-            halfrays[1].OnReachAWall += _CB_OnHalfRayIsOver;
+            _ray = GetComponent<LineRenderer>();
+            _collider = GetComponent<BoxCollider2D>();
         }
 
-        public void DrawRay(Vector3 startingPos, RayLauncher.RayDirection direction, Action onComplete, Action onFail)
+        private void OnCollisionEnter2D(Collision2D collision)
         {
-            _onComplete = onComplete;
-            _onFail = onFail;
-            if (direction == RayLauncher.RayDirection.Horizontal)
+            if (OnHit != null)
+                OnHit();
+        }
+
+        private void OnDestroy()
+        {
+            Destroy(_ray);
+        }
+
+        public Vector2 ImpactPoint
+        {
+            get { return _ray.GetPosition(1); }
+        }
+
+        public void DrawRay(Vector3 startingPos, RayDirection direction)
+        {
+            _ray.SetPosition(0, startingPos);
+            _ray.SetPosition(1, startingPos);
+            StartCoroutine(Co_DrawRay(direction));
+        }
+
+        private IEnumerator Co_DrawRay(RayDirection direction)
+        {
+            Vector3 dir = Vector3.zero;
+            switch (direction)
             {
-                halfrays[0].DrawRay(startingPos, HalfRay.RayDirection.Left);
-                halfrays[1].DrawRay(startingPos, HalfRay.RayDirection.Right);
+                case RayDirection.Up: dir = Vector2.up; break;
+                case RayDirection.Down: dir = Vector2.down; break;
+                case RayDirection.Left: dir = Vector2.left; break;
+                case RayDirection.Right: dir = Vector2.right; break;
             }
-            else
+
+            modEven = (int)direction % 2;         // 0 for up and down, 1 otherwise
+            modOdd = ((int)direction + 1) % 2;    // the opposite
+
+            while (true)
             {
-                halfrays[0].DrawRay(startingPos, HalfRay.RayDirection.Up);
-                halfrays[1].DrawRay(startingPos, HalfRay.RayDirection.Down);
+                float distance = speed * Time.deltaTime;
+                var hit = Physics2D.Raycast(_ray.GetPosition(1), dir, distance, 1 << LayerMask.NameToLayer("Wall"));
+
+                if (hit.collider == null)
+                {
+                    _ExtendRay(dir * distance);
+                    yield return new WaitForEndOfFrame();
+                }
+                else
+                {
+                    _ExtendRay(dir * hit.distance);
+                    isOver = true;
+                    if (OnReachAWall != null)
+                        OnReachAWall();
+
+                    break;
+                }
             }
         }
 
-        private void _CB_OnHalfRayIsOver()
-        {
-            if (halfrays[0].isOver && halfrays[1].isOver)
-            {
-                halfrays[0].OnHit -= _CB_OnHalfRayIsHit;
-                halfrays[1].OnHit -= _CB_OnHalfRayIsHit;
-                Destroy(halfrays[0]);
-                Destroy(halfrays[1]);
-                if (_onComplete != null)
-                    _onComplete();
-            }
-        }
+        private int modEven;
+        private int modOdd;
 
-        private void _CB_OnHalfRayIsHit()
+        private void _ExtendRay(Vector3 extension)
         {
-            if (_onFail != null)
-                _onFail();
-            Destroy(this.gameObject);
+            _ray.SetPosition(1, _ray.GetPosition(1) + extension);
+
+            var diff = (_ray.GetPosition(1) - _ray.GetPosition(0));
+            _collider.offset = new Vector2(diff.x / 2 * modEven, diff.y / 2 * modOdd);
+            _collider.size = new Vector2(WallBuilder.WallWidth * modOdd + Mathf.Abs(diff.x) * modEven, WallBuilder.WallWidth * modEven + Mathf.Abs(diff.y) * modOdd);
         }
     }
 }

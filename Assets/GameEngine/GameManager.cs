@@ -9,26 +9,82 @@ namespace GameEngine
         public GameObject root;
         public Transform[] rootLimits; // bottomLeft, topRight
 
-        public GameObject[] balls; // PawnBall
+        public GameObject[] P_balls; // PawnBall
+        public GameObject P_shark;
 
-        private Cell _rootCell;
+        [SerializeField]
+        private RayLauncher _rayLauncher;
+        public RayLauncher RayLauncher
+        {
+            get { return _rayLauncher; }
+        }
+
+        [SerializeField]
+        private ForeGroundPainter _foregroundPainter;
+        public ForeGroundPainter ForegroundPainter
+        {
+            get { return _foregroundPainter; }
+        }
+
         public Cell RootCell
         {
-            get { return _rootCell; }
+            get;
+            private set;
+        }
+
+        public Shark Shark
+        {
+            get;
+            private set;
+        }
+
+        [SerializeField]
+        private GameProgression _gameProgression;
+        public GameProgression Progression
+        {
+            get { return _gameProgression; }
+        }
+
+        private static GameManager _instance = null;
+        public static GameManager Instance
+        {
+            get { return _instance; }
+        }
+
+        protected virtual void Awake()
+        {
+            DontDestroyOnLoad(gameObject);
+
+            if (_instance == null)
+            {
+                _instance = this;
+            }
+            else if (_instance != this)
+            {
+                Destroy(gameObject);
+            }
         }
 
         private void Start()
         {
+            Progression.OnCoveredAreaIsModified += (float percentageArea) =>
+            {
+                Debug.Log(percentageArea);
+            };
             StartGame();
         }
 
         public void StartGame()
         {
-            _rootCell = gameObject.AddComponent<Cell>();
-            _rootCell.Ctor(rootLimits[0].position, rootLimits[1].position);
+            RootCell = new Cell(rootLimits[0].position, rootLimits[1].position);
 
-            GameObject ball = Instantiate(balls[0], new Vector3(Random.Range(RootCell.bottomLeft.x, RootCell.topRight.x), Random.Range(RootCell.bottomLeft.y, RootCell.topRight.y)), Quaternion.identity);
-            _rootCell.AddBall(ball.GetComponent<Ball>());
+            var v = (RootCell.bottomLeft + RootCell.topRight) / 2;
+            Shark = Instantiate(P_shark, new Vector3(v.x, v.y, -2), Quaternion.identity).GetComponentInChildren<Shark>();
+
+            GameObject ball = Instantiate(P_balls[0], new Vector3(Random.Range(RootCell.bottomLeft.x, RootCell.topRight.x), Random.Range(RootCell.bottomLeft.y, RootCell.topRight.y), -1), Quaternion.identity);
+            GameObject ball2 = Instantiate(P_balls[1], new Vector3(Random.Range(RootCell.bottomLeft.x, RootCell.topRight.x), Random.Range(RootCell.bottomLeft.y, RootCell.topRight.y) -1), P_balls[1].transform.rotation);
+            RootCell.AddBall(ball.GetComponent<Ball>());
+            RootCell.AddBall(ball2.GetComponent<Ball>());
         }
     }
 }
