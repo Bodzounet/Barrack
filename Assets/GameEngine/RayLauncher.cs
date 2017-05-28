@@ -62,7 +62,7 @@ namespace GameEngine
 
         private void _UpdateRayDirection()
         {
-            if (Input.GetKeyDown(KeyCode.Space))
+            if (!IsShooting && Input.GetKeyDown(KeyCode.Space))
             {
                 Direction = (RayDirection)(((int)Direction + 1) % 2);
             }
