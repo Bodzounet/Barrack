@@ -83,9 +83,15 @@ namespace GameEngine
 
             //GameObject ball = Instantiate(P_balls[0], new Vector3(Random.Range(RootCell.bottomLeft.x, RootCell.topRight.x), Random.Range(RootCell.bottomLeft.y, RootCell.topRight.y), -1), Quaternion.identity);
             //GameObject ball2 = Instantiate(P_balls[1], new Vector3(Random.Range(RootCell.bottomLeft.x, RootCell.topRight.x), Random.Range(RootCell.bottomLeft.y, RootCell.topRight.y) -1), P_balls[1].transform.rotation);
-            GameObject ball = Instantiate(P_balls[2], new Vector3(Random.Range(RootCell.bottomLeft.x, RootCell.topRight.x), Random.Range(RootCell.bottomLeft.y, RootCell.topRight.y), -1), Quaternion.identity);
-            RootCell.AddBall(ball.GetComponent<Ball>());
+            //GameObject ball = Instantiate(P_balls[2], new Vector3(Random.Range(RootCell.bottomLeft.x, RootCell.topRight.x), Random.Range(RootCell.bottomLeft.y, RootCell.topRight.y), -1), Quaternion.identity);
+            //RootCell.AddBall(ball.GetComponent<Ball>());
             //RootCell.AddBall(ball2.GetComponent<Ball>());
+
+            for (int i = 0; i < 10; i++)
+            {
+                GameObject ball = Instantiate(P_balls[2], new Vector3(Random.Range(RootCell.bottomLeft.x, RootCell.topRight.x), Random.Range(RootCell.bottomLeft.y, RootCell.topRight.y), -1), Quaternion.identity);
+                RootCell.AddBall(ball.GetComponent<Ball>());
+            }
         }
     }
 }

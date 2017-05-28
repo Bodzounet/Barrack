@@ -46,7 +46,7 @@ namespace GameEngine.Balls
         {
             Life = 3;
             GetComponent<Rigidbody2D>().AddForce(new Vector2(UnityEngine.Random.Range(-maxSpeed, maxSpeed), UnityEngine.Random.Range(-maxSpeed, maxSpeed)));
-            GetComponent<Rigidbody2D>().AddTorque(0.5f);
+            GetComponent<Rigidbody2D>().AddTorque(UnityEngine.Random.Range(0f, 1f));
         }
 
         private void OnCollisionEnter2D(Collision2D collision)
@@ -62,6 +62,7 @@ namespace GameEngine.Balls
         {
             GameObject brokenBall = GameObject.Instantiate(P_BrokenBall, transform.position, Quaternion.identity);
             brokenBall.GetComponent<GlassBallExplosion>().Explode(collisionPoint);
+            ParentCell.RemoveBall(this);
             Destroy(this.gameObject);
         }
     }
