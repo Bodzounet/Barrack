@@ -13,7 +13,5 @@ namespace GameEngine.Balls
             GetComponent<Rigidbody2D>().AddForce(new Vector2(Random.Range(-maxSpeed, maxSpeed), Random.Range(-maxSpeed, maxSpeed)));
             //GetComponent<Rigidbody2D>().velocity = new Vector2(Random.Range(-maxSpeed, maxSpeed), Random.Range(-maxSpeed, maxSpeed));
         }
-
-        
     }
 }

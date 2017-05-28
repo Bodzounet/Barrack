@@ -81,10 +81,11 @@ namespace GameEngine
             var v = (RootCell.bottomLeft + RootCell.topRight) / 2;
             Shark = Instantiate(P_shark, new Vector3(v.x, v.y, -2), Quaternion.identity).GetComponentInChildren<Shark>();
 
-            GameObject ball = Instantiate(P_balls[0], new Vector3(Random.Range(RootCell.bottomLeft.x, RootCell.topRight.x), Random.Range(RootCell.bottomLeft.y, RootCell.topRight.y), -1), Quaternion.identity);
-            GameObject ball2 = Instantiate(P_balls[1], new Vector3(Random.Range(RootCell.bottomLeft.x, RootCell.topRight.x), Random.Range(RootCell.bottomLeft.y, RootCell.topRight.y) -1), P_balls[1].transform.rotation);
+            //GameObject ball = Instantiate(P_balls[0], new Vector3(Random.Range(RootCell.bottomLeft.x, RootCell.topRight.x), Random.Range(RootCell.bottomLeft.y, RootCell.topRight.y), -1), Quaternion.identity);
+            //GameObject ball2 = Instantiate(P_balls[1], new Vector3(Random.Range(RootCell.bottomLeft.x, RootCell.topRight.x), Random.Range(RootCell.bottomLeft.y, RootCell.topRight.y) -1), P_balls[1].transform.rotation);
+            GameObject ball = Instantiate(P_balls[2], new Vector3(Random.Range(RootCell.bottomLeft.x, RootCell.topRight.x), Random.Range(RootCell.bottomLeft.y, RootCell.topRight.y), -1), Quaternion.identity);
             RootCell.AddBall(ball.GetComponent<Ball>());
-            RootCell.AddBall(ball2.GetComponent<Ball>());
+            //RootCell.AddBall(ball2.GetComponent<Ball>());
         }
     }
 }

@@ -10,11 +10,13 @@ namespace GameEngine.Balls
         public Texture[] ballTextures; // many cracks, little cracks, uncracked
         public GameObject P_BrokenBall;
 
+        public float maxSpeed = 50;
+
         private Renderer _renderer;
 
         private Vector3 collisionPoint;
 
-        private int _life = 1;
+        private int _life;
         private int Life
         {
             get { return _life; }
@@ -26,14 +28,13 @@ namespace GameEngine.Balls
                 _life = value;
                 if (Life > 0)
                 {
-                    _renderer.material.mainTexture = ballTextures[Life - 1];
+                    _renderer.material.SetTexture("_Normal", ballTextures[Life - 1]);
                 }
                 else
                 {
                     _DestroyBall();
                 }
             }
-
         }
 
         private void Awake()
@@ -43,7 +44,9 @@ namespace GameEngine.Balls
 
         private void Start()
         {
-            //Life = 3;
+            Life = 3;
+            GetComponent<Rigidbody2D>().AddForce(new Vector2(UnityEngine.Random.Range(-maxSpeed, maxSpeed), UnityEngine.Random.Range(-maxSpeed, maxSpeed)));
+            GetComponent<Rigidbody2D>().AddTorque(0.5f);
         }
 
         private void OnCollisionEnter2D(Collision2D collision)
@@ -58,10 +61,7 @@ namespace GameEngine.Balls
         private void _DestroyBall()
         {
             GameObject brokenBall = GameObject.Instantiate(P_BrokenBall, transform.position, Quaternion.identity);
-            for (int i = 0; i < brokenBall.transform.childCount; i++)
-            {
-                brokenBall.transform.GetChild(i).GetComponent<Rigidbody>().AddExplosionForce(150, collisionPoint, 3);
-            }
+            brokenBall.GetComponent<GlassBallExplosion>().Explode(collisionPoint);
             Destroy(this.gameObject);
         }
     }
